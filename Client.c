@@ -7,6 +7,7 @@
 int main(int argc , char *argv[])
 {
 	int sock;
+	// sockaddr_in struct holds address info
 	struct sockaddr_in server;
 	char message[1000] , server_reply[2000];
 
@@ -20,9 +21,12 @@ int main(int argc , char *argv[])
 
 	server.sin_addr.s_addr = inet_addr("127.0.0.1");
 	server.sin_family = AF_INET;
+	//htons() - host to network - store in network byte order
 	server.sin_port = htons( 9999 );
 
 	//Connect to remote server
+	// unsuccessful socket connect returns -1 success: 0
+	// Corresponds to accept() in server
 	if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
 	{
 		perror("connect failed. Error");
@@ -35,16 +39,19 @@ int main(int argc , char *argv[])
 	while(1)
 	{
 		printf("Enter message : ");
-		scanf("%s" , message);
+		//scanf("%s" , message);
+		//gets continues through whitespaces while scanf does not
+		gets(message);
 
 		//Send some data
+		// Received by recv() on server side 
 		if( send(sock , message , strlen(message) , 0) < 0)
 		{
 			puts("Send failed");
 			return 1;
 		}
 
-		//Receive a reply from the server
+		//Receive a reply from the server - specifically server's send()
 		if(recv(sock , server_reply , 2000 , 0) < 0)
 		{
 			puts("recv failed");
